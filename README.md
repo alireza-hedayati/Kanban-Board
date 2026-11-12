@@ -25,6 +25,10 @@ A lightweight, modern, responsive **Kanban Board** application built with pure V
 - 🔢 **Dynamic Counters & Empty States**:
   - Real-time task count badges for every column.
   - Contextual empty state placeholders when columns have no tasks.
+- 🌙 **Dark & Light Mode Support**:
+  - Seamless toggle with persistent user preference in `localStorage`.
+  - Automatic detection and synchronization with system OS preferences (`prefers-color-scheme`).
+  - Specially calibrated dark theme tokens with soft elevations and contrast ratios.
 - 🎨 **Modern & Accessible UI**:
   - CSS custom properties (variables) for coherent theming.
   - Smooth transitions, card elevations, and hover states.
@@ -52,7 +56,8 @@ Kanban/
 3. **`DOMRenderer`**: Responsible for DOM generation, XSS-safe text injection, empty states, and badge count updates.
 4. **`DragDropController`**: Manages native HTML5 drag-and-drop lifecycle (`dragstart`, `dragover`, `drop`, `dragend`).
 5. **`ModalController`**: Manages modal visibility, form validations, accessibility focus, and keyboard shortcuts.
-6. **`App`**: Bootstraps the application and hooks up all controller events on `DOMContentLoaded`.
+6. **`ThemeManager`**: Handles dark/light theme switching, system preference detection, and persistence.
+7. **`App`**: Bootstraps the application and hooks up all controller events on `DOMContentLoaded`.
 
 ---
 

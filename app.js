@@ -1,7 +1,7 @@
 /**
  * Kanban Task Manager
  * Clean Architecture with Vanilla JavaScript
- * Modules: StorageService, StateManager, DOMRenderer, DragDropController, ModalController, App
+ * Modules: StorageService, StateManager, DOMRenderer, DragDropController, ModalController, ThemeManager, App
  */
 
 (function () {
@@ -665,11 +665,66 @@
   };
 
   // ==========================================================================
-  // 6. Application Controller & Initialization
+  // 6. Theme Manager (Dark / Light mode persistence)
+  // ==========================================================================
+  const ThemeManager = {
+    STORAGE_KEY: 'kanban_theme_preference',
+    themeToggleBtn: document.getElementById('btn-theme-toggle'),
+
+    init() {
+      const savedTheme = localStorage.getItem(this.STORAGE_KEY);
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+      this.applyTheme(initialTheme);
+      this.bindEvents();
+    },
+
+    bindEvents() {
+      if (this.themeToggleBtn) {
+        this.themeToggleBtn.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme') || 
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          this.setTheme(nextTheme);
+        });
+      }
+
+      // Listen to OS theme changes if user hasn't set an explicit preference
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem(this.STORAGE_KEY)) {
+          this.applyTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    },
+
+    setTheme(theme) {
+      try {
+        localStorage.setItem(this.STORAGE_KEY, theme);
+      } catch (err) {
+        console.error('ThemeManager: Failed to save theme preference', err);
+      }
+      this.applyTheme(theme);
+    },
+
+    applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (this.themeToggleBtn) {
+        const isDark = theme === 'dark';
+        const labelText = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        this.themeToggleBtn.setAttribute('aria-label', labelText);
+        this.themeToggleBtn.setAttribute('title', labelText);
+      }
+    }
+  };
+
+  // ==========================================================================
+  // 7. Application Controller & Initialization
   // ==========================================================================
   const App = {
     init() {
-      // 1. Initialize State and Local Storage
+      // 1. Initialize Theme, State and Local Storage
+      ThemeManager.init();
       StateManager.init();
 
       // 2. Subscribe DOM Renderer to State changes
