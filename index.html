@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Board</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
+          <line x1="9" y1="3" x2="9" y2="21"></line>
+          <line x1="15" y1="3" x2="15" y2="21"></line>
+        </svg>
+        <h1 class="brand-title">Kanban Board</h1>
+      </div>
+      <button id="btn-add-task" class="btn btn-primary" type="button" aria-haspopup="dialog">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Add Task</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Board Area -->
+  <main class="board-main">
+    <div class="board-container">
+      
+      <!-- Todo Column -->
+      <section class="board-column" data-status="todo" aria-label="To Do Column">
+        <div class="column-header column-header-todo">
+          <div class="column-title-group">
+            <span class="column-indicator indicator-todo"></span>
+            <h2 class="column-title">To Do</h2>
+          </div>
+          <span class="column-badge" id="count-todo">0</span>
+        </div>
+        <div class="task-list" id="list-todo" data-status="todo" role="list">
+          <!-- Task cards injected dynamically -->
+        </div>
+      </section>
+
+      <!-- In Progress Column -->
+      <section class="board-column" data-status="inprogress" aria-label="In Progress Column">
+        <div class="column-header column-header-inprogress">
+          <div class="column-title-group">
+            <span class="column-indicator indicator-inprogress"></span>
+            <h2 class="column-title">In Progress</h2>
+          </div>
+          <span class="column-badge" id="count-inprogress">0</span>
+        </div>
+        <div class="task-list" id="list-inprogress" data-status="inprogress" role="list">
+          <!-- Task cards injected dynamically -->
+        </div>
+      </section>
+
+      <!-- Done Column -->
+      <section class="board-column" data-status="done" aria-label="Done Column">
+        <div class="column-header column-header-done">
+          <div class="column-title-group">
+            <span class="column-indicator indicator-done"></span>
+            <h2 class="column-title">Done</h2>
+          </div>
+          <span class="column-badge" id="count-done">0</span>
+        </div>
+        <div class="task-list" id="list-done" data-status="done" role="list">
+          <!-- Task cards injected dynamically -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Task Modal (Create & Edit) -->
+  <div id="task-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">Create New Task</h3>
+        <button type="button" class="btn-close" id="modal-close-btn" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="task-form" class="modal-form" novalidate>
+        <input type="hidden" id="task-id" name="id">
+        
+        <div class="form-group">
+          <label for="task-title" class="form-label">Task Title <span class="required-mark">*</span></label>
+          <input 
+            type="text" 
+            id="task-title" 
+            name="title" 
+            class="form-control" 
+            placeholder="e.g. Design authentication workflow" 
+            maxlength="120"
+            required
+            autocomplete="off"
+          >
+          <span class="error-msg" id="title-error">Task title is required.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="task-desc" class="form-label">Description <span class="optional-mark">(optional)</span></label>
+          <textarea 
+            id="task-desc" 
+            name="description" 
+            class="form-control form-textarea" 
+            rows="4" 
+            placeholder="Add relevant details, acceptance criteria, or links..."
+            maxlength="600"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="task-status" class="form-label">Column / Status</label>
+          <select id="task-status" name="status" class="form-control form-select">
+            <option value="todo">To Do</option>
+            <option value="inprogress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit-btn">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <h3 id="delete-modal-title" class="modal-title delete-title">Delete Task</h3>
+        <button type="button" class="btn-close" id="delete-close-btn" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="delete-message">Are you sure you want to delete this task? This action cannot be undone.</p>
+        <p class="delete-task-preview" id="delete-task-preview"></p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="delete-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="delete-confirm-btn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
